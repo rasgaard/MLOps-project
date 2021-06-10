@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 import datasets as ds
+import pickle
 
 def dataset():
     df = pd.read_csv('../../data/raw/train.csv')
@@ -11,6 +12,9 @@ def dataset():
 
     dataset = ds.Dataset.from_pandas(df)
     dataset.features['labels'] = ds.ClassLabel(num_classes=2, names=['unreliable', 'reliable'])
+
+    with open('../../data/processed/dataset.pickle', 'wb') as f:
+        pickle.dump([dataset], f)
 
     return dataset
 
