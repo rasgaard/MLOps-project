@@ -1,9 +1,17 @@
-MLOps-project
+# MLOps-project
 ==============================
 
-Project for the course on Machine Learning Operations
+## Project description
 
-Project Organization
+The goal of our project is to classify fake news articles with the Huggingface Transformers framework. 
+
+Our starting point will be using [this page](https://huggingface.co/transformers/custom_datasets.html) from the Transformers documentation and use a pre-trained BERT variant as a sequence classifier which will then be fine-tuned on custom data.
+
+The data is collected from Kaggle where we initially use [this data set](https://www.kaggle.com/c/fake-news/overview) and we intend to extend the data set to be combined with [this data set](https://www.kaggle.com/clmentbisaillon/fake-and-real-news-dataset). 
+
+
+
+## Project Organization
 ------------
 
     ├── LICENSE
