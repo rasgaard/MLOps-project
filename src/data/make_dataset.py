@@ -4,7 +4,7 @@ import datasets as ds
 import pickle
 
 def dataset():
-    df = pd.read_csv('../../data/raw/train.csv')
+    df = pd.read_csv('data/raw/train.csv')
     df = df.fillna('')
     df = df.rename(columns={'label': 'labels'})
     df['text'] = df['title'] + '\n\n' + df['text']
@@ -13,9 +13,9 @@ def dataset():
     dataset = ds.Dataset.from_pandas(df)
     dataset.features['labels'] = ds.ClassLabel(num_classes=2, names=['unreliable', 'reliable'])
 
-    with open('../../data/processed/dataset.pickle', 'wb') as f:
+    with open('data/processed/dataset.pickle', 'wb') as f:
         pickle.dump(dataset, f)
 
     return dataset
 
-dataset = dataset()
+#dataset = dataset()

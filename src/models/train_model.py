@@ -9,30 +9,14 @@ import pickle
 
 
 def train():
-    with open('../../data/processed/dataset.pickle', 'rb') as f:
+    with open('data/processed/train_tokenized.pickle', 'rb') as f:
         dataset = pickle.load(f)
 
-    train_data, test_data = dataset.train_test_split(test_size=0.9).values()
-
     model = RobertaForSequenceClassification.from_pretrained('roberta-base')
-    tokenizer = RobertaTokenizerFast.from_pretrained('roberta-base', max_length=512)
-
-    # define a function that will tokenize the model, and will return the relevant inputs for the model
-    def tokenization(batched_text):
-        return tokenizer(batched_text['text'], padding=True, truncation=True)
-
-    train_data = train_data.map(tokenization, batched=True, batch_size=len(train_data))
-    test_data = test_data.map(tokenization, batched=True, batch_size=len(test_data))
-
-    train_data.set_format('torch', columns=['input_ids', 'labels'])
-    test_data.set_format('torch', columns=['input_ids', 'labels'])
-    #train_data.set_format('torch')
-    #test_data.set_format('torch')
-
+    
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-    batch_size = 100
-
+    batch_size = 10
     trainloader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     testloader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
 
