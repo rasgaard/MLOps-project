@@ -12,7 +12,7 @@ def train():
     with open('../../data/processed/dataset.pickle', 'rb') as f:
         dataset = pickle.load(f)
 
-    train_data, test_data = dataset.train_test_split(test_size=0.25).values()
+    train_data, test_data = dataset.train_test_split(test_size=0.9).values()
 
     model = RobertaForSequenceClassification.from_pretrained('roberta-base')
     tokenizer = RobertaTokenizerFast.from_pretrained('roberta-base', max_length=512)
@@ -24,29 +24,33 @@ def train():
     train_data = train_data.map(tokenization, batched=True, batch_size=len(train_data))
     test_data = test_data.map(tokenization, batched=True, batch_size=len(test_data))
 
-    # train_data.set_format('torch', columns=['input_ids', 'attention_mask', 'label'])
-    # test_data.set_format('torch', columns=['input_ids', 'attention_mask', 'label'])
-    train_data.set_format('torch')
-    test_data.set_format('torch')
+    train_data.set_format('torch', columns=['input_ids', 'labels'])
+    test_data.set_format('torch', columns=['input_ids', 'labels'])
+    #train_data.set_format('torch')
+    #test_data.set_format('torch')
 
-    
-    batch_size = 1
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
+    batch_size = 100
 
     trainloader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     testloader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
 
     optim = AdamW(model.parameters(), lr=5e-5)
-    
+
+    model.to(device)
     model.train()
     for epoch in range(3):
-        for (text, labels) in enumerate(trainloader):
+        print("Epoch: ", epoch)
+        i = 0
+        for batch in trainloader:
+            i += 1
+            print("Batch nr.: ", i)
             optim.zero_grad()
-            print(text)
-            print(labels)
             input_ids = batch['input_ids'].to(device)
-            attention_mask = batch['attention_mask'].to(device)
+            #attention_mask = batch['attention_mask'].to(device)
             labels = batch['labels'].to(device)
-            outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
+            outputs = model(input_ids, labels=labels)
             loss = outputs[0]
             loss.backward()
             optim.step()
