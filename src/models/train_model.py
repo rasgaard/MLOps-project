@@ -1,6 +1,6 @@
 import pandas as pd
 import datasets as ds
-from transformers import RobertaTokenizerFast, RobertaForSequenceClassification, Trainer, TrainingArguments
+from transformers import RobertaTokenizerFast, RobertaForSequenceClassification, Trainer, TrainingArguments, AdamW
 import torch
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
@@ -29,6 +29,34 @@ def train():
     train_data.set_format('torch')
     test_data.set_format('torch')
 
+    
+    batch_size = 1
+
+    trainloader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
+    testloader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
+
+    optim = AdamW(model.parameters(), lr=5e-5)
+    
+    model.train()
+    for epoch in range(3):
+        for (text, labels) in enumerate(trainloader):
+            optim.zero_grad()
+            print(text)
+            print(labels)
+            input_ids = batch['input_ids'].to(device)
+            attention_mask = batch['attention_mask'].to(device)
+            labels = batch['labels'].to(device)
+            outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
+            loss = outputs[0]
+            loss.backward()
+            optim.step()
+
+    model.eval()
+
+
+
+
+    """
     # define the training arguments
     training_args = TrainingArguments(
         output_dir='trainer/results',
@@ -76,6 +104,7 @@ def train():
 
     trainer.model.save_pretrained('saved-models/roBERTa-base/')
 
+"""
 
 if __name__ == '__main__':
     train()
