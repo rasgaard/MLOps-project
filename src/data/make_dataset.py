@@ -14,7 +14,7 @@ def dataset():
     dataset.features['labels'] = ds.ClassLabel(num_classes=2, names=['unreliable', 'reliable'])
 
     with open('../../data/processed/dataset.pickle', 'wb') as f:
-        pickle.dump([dataset], f)
+        pickle.dump(dataset, f)
 
     return dataset
 
