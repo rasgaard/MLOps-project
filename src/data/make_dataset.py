@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-import pandas as pd
 import pickle
-import torch
+
+import pandas as pd
+
 from src.features.build_features import encode_text
 
 
-def read_data():
-    df = pd.read_csv('data/raw/train.csv')
+def read_data(train=True):
+    file = 'train' if train else 'test'
+    df = pd.read_csv(f'data/raw/{file}.csv')
     df = df.fillna('')
     df = df.rename(columns={'label': 'labels'})
     df['text'] = df['title'] + '\n\n' + df['text']
@@ -14,11 +16,11 @@ def read_data():
 
     return list(df['text'].values), list(df['labels'].values)
 
-def get_encoded_data():
-    texts, labels = read_data()
+def get_encoded_data(train=True):
+    texts, labels = read_data(train)
     encoded_data = encode_text(texts, labels)
-    with open("data/processed/dataset.pkl", 'wb') as f:
-        pickle.dump(encoded_data, f)
+    # with open("data/processed/dataset.pkl", 'wb') as f:
+    #     pickle.dump(encoded_data, f)
     return encoded_data
 
 if __name__ == "__main__":
