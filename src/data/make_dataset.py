@@ -4,7 +4,7 @@ import pickle
 import pandas as pd
 
 from src.features.build_features import encode_text
-
+# Hej
 
 def read_data(train=True):
     file = 'train' if train else 'test'
