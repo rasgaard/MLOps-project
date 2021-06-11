@@ -7,7 +7,7 @@ The goal of our project is to implement a classifier that can label fake news ar
 
 Our starting point will be using [this page](https://huggingface.co/transformers/custom_datasets.html) from the Transformers documentation and use a pre-trained BERT variant as a sequence classifier which will then be fine-tuned on custom data. We plan to use [RoBERTa](https://huggingface.co/transformers/model_doc/roberta.html#robertaforsequenceclassification) but that is subject to change.
 
-The data is collected from Kaggle where we initially use [this data set](https://www.kaggle.com/c/fake-news/overview) and we intend to extend the data set to be combined with [this data set](https://www.kaggle.com/clmentbisaillon/fake-and-real-news-dataset). The first data set consists of 26.000 article titles and texts. The second consists of 44.898 articles also with titles and texts. The two classes are balanced approximately 50/50.
+The data is collected from Kaggle where we initially use [this data set](https://www.kaggle.com/c/fake-news/overview) and we intend to extend the data set to be combined with [this data set](https://www.kaggle.com/clmentbisaillon/fake-and-real-news-dataset). The first data set consists of 26.000 article titles and texts. The second consists of 44.898 articles also with titles and texts. The two classes are balanced approximately 50/50. Titles and texts will be combined as the input data and the labels will be used as the targets. 
 
 
 
