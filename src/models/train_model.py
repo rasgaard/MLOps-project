@@ -19,6 +19,7 @@ def train(epochs=3, lr=0.003):
     dataset = get_encoded_data(train=True)
     train_loader = DataLoader(dataset, 4, shuffle=True)
 
+""".git/
     for epoch in range(epochs):
         running_loss = 0
         for batch_idx, batch in enumerate(train_loader):
@@ -42,7 +43,7 @@ def train(epochs=3, lr=0.003):
 
     # Should be loadable with RobertaForSequenceClassification.from_pretrained('models/Roberta-fakenews.pt')
     model.save_pretrained('models/Roberta-fakenews.pt') 
-
+"""
 
 if __name__ == '__main__':
     train()

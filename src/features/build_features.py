@@ -4,6 +4,7 @@ from transformers import RobertaTokenizerFast
 
 class FakeNewsDataset(torch.utils.data.Dataset):
     def __init__(self, encodings, labels):
+        super().__init__()
         self.encodings = encodings
         self.labels = labels
 
