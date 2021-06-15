@@ -1,10 +1,14 @@
+import argparse
+import sys
+import time
+
 import torch
 from torch.utils.data import DataLoader
 from transformers import AdamW, RobertaForSequenceClassification
-import time
 
 #import wandb
-from src.data.make_dataset import get_encoded_data
+from src.data.make_dataset import read_data
+from src.features.build_features import encode_texts
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
@@ -12,7 +16,7 @@ device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cp
 start = time.time()
 
 
-def train(epochs=3, lr=0.003):
+def train(epochs, lr):
     model = RobertaForSequenceClassification.from_pretrained('roberta-base')
     model.to(device)
     model.train()
@@ -20,9 +24,10 @@ def train(epochs=3, lr=0.003):
     #wandb.watch(model, log_freq=100)
 
     optim = AdamW(model.parameters(), lr=lr)
-    encoded_train, encoded_val = get_encoded_data(train=True)
-    train_loader = DataLoader(encoded_train, 16, shuffle=True, num_workers=4)
-    val_loader = DataLoader(encoded_val, 16, shuffle=True, num_workers=4)
+    train_texts, val_texts, train_labels, val_labels = read_data()
+    encoded_train, encoded_val = encode_texts(train_texts, train_labels), encode_texts(val_texts, val_labels)
+    train_loader = DataLoader(encoded_train, 4, shuffle=True, num_workers=4)
+    val_loader = DataLoader(encoded_val, 4, shuffle=True, num_workers=4)
 
     lowest_val_loss = 1000
     for epoch in range(epochs):
@@ -34,32 +39,37 @@ def train(epochs=3, lr=0.003):
             attention_mask = batch['attention_mask'].to(device)
             labels = batch['labels'].to(device)
 
-            outputs = model(
-                input_ids, attention_mask=attention_mask, labels=labels)
+            outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
             loss = outputs[0]
             running_loss_train += loss
             loss.backward()
             optim.step()
-            print(f"Batch {batch_idx+1}/{len(train_loader)}", end='\r')
+            print(f"\nTrain batch {batch_idx+1}/{len(train_loader)}", end='\r')
             # if batch_idx % 40 == 0:
             #wandb.log({"Loss": loss})
 
-        print(f"\nEpoch {epoch+1}/{epochs}\tLoss: {running_loss_train/len(train_loader)}\n")
+        
 
-        for batch_idx, batch in enumerate(val_loader):
-            input_ids = batch['input_ids'].to(device)
-            attention_mask = batch['attention_mask'].to(device)
-            labels = batch['labels'].to(device)
+        with torch.no_grad():
+            model.eval()
+            for batch_idx, batch in enumerate(val_loader):
+                input_ids = batch['input_ids'].to(device)
+                attention_mask = batch['attention_mask'].to(device)
+                labels = batch['labels'].to(device)
 
-            outputs = model(
-                input_ids, attention_mask=attention_mask, labels=labels)
-            loss = outputs[0]
-            running_loss_val += loss
+                outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
+                loss = outputs[0]
+                running_loss_val += loss
+                print(f"\nValidation batch {batch_idx+1}/{len(train_loader)}", end='\r')
 
         # Save the model with the lowest validation loss
         if running_loss_val < lowest_val_loss:
             model.save_pretrained('models/Roberta-fakenews.pt')
             running_loss_val = lowest_val_loss
+
+        print(f"\nEpoch {epoch+1}/{epochs}\
+                \nTraining loss: {running_loss_train/len(train_loader)}\
+                \nValidation loss: {running_loss_val/len(val_loader)}\n")
 
     # Execution time
     end = time.time()
@@ -68,4 +78,10 @@ def train(epochs=3, lr=0.003):
 
 
 if __name__ == '__main__':
-    train()
+    parser = argparse.ArgumentParser(description="Training arguments")
+    parser.add_argument("--lr", default=0.003)
+    parser.add_argument("--epochs", default=3)
+    args = parser.parse_args(sys.argv[1:])
+    print(args)
+
+    train(epochs=int(args.epochs), lr=float(args.lr))

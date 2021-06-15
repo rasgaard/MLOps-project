@@ -1,10 +1,12 @@
 
-import datasets as ds
-from transformers import RobertaTokenizerFast
-import torch
-from torch.utils.data import Dataset, DataLoader
-import numpy as np
 import pickle
+
+import datasets as ds
+import numpy as np
+import torch
+from torch.utils.data import DataLoader, Dataset
+from transformers import RobertaTokenizerFast
+
 
 def preprocess():
     with open('data/processed/dataset.pickle', 'rb') as f:

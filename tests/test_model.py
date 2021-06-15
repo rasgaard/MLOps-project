@@ -1,10 +1,12 @@
-from transformers import AdamW, RobertaForSequenceClassification
-from src.data.make_dataset import read_data
-from src.features.build_features import encode_texts
-from torch.utils.data import DataLoader
+import pytest
 import torch
 import torch.nn.functional as F
-import pytest
+from torch.utils.data import DataLoader
+from transformers import AdamW, RobertaForSequenceClassification
+
+from src.data.make_dataset import read_data
+from src.features.build_features import encode_texts
+
 
 def test_model():
     model = RobertaForSequenceClassification.from_pretrained('roberta-base')

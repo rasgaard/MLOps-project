@@ -1,7 +1,8 @@
-from src.data.make_dataset import read_data
-from src.features.build_features import encode_texts
 import numpy as np
 import torch
+
+from src.data.make_dataset import read_data
+from src.features.build_features import encode_texts
 
 # read raw data 
 train_texts, val_texts, train_labels, val_labels = read_data()
