@@ -1,6 +1,7 @@
 import torch
 from transformers import RobertaTokenizerFast
-
+import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 class FakeNewsDataset(torch.utils.data.Dataset):
     def __init__(self, encodings, labels):
