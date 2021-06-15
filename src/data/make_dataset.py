@@ -11,10 +11,6 @@ from src.features.build_features import encode_text
 def read_data(train=True):
     file = 'train' if train else 'test'
     df = pd.read_csv(f'data/raw/{file}.csv')
-    df = df.fillna('')
-    df = df.rename(columns={'label': 'labels'})
-    df['text'] = df['title'] + '\n\n' + df['text']
-    df = df.drop(columns=['id', 'title', 'author'])
 
     return list(df['text'].values), list(df['labels'].values)
 
