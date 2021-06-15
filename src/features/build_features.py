@@ -19,7 +19,7 @@ class FakeNewsDataset(torch.utils.data.Dataset):
         return len(self.labels)
 
 
-def encode_text(texts, labels):
+def encode_texts(texts, labels):
     tokenizer = RobertaTokenizerFast.from_pretrained(
         'roberta-base', max_length=512)
     encodings = tokenizer(texts, truncation=True, padding=True)

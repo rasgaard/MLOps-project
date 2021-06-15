@@ -1,6 +1,6 @@
 from transformers import AdamW, RobertaForSequenceClassification
-from src.features.build_features import encode_text
-from src.data.make_dataset import read_data, get_encoded_data
+from src.data.make_dataset import read_data
+from src.features.build_features import encode_texts
 from torch.utils.data import DataLoader
 import torch
 import torch.nn.functional as F
@@ -8,7 +8,8 @@ import pytest
 
 def test_model():
     model = RobertaForSequenceClassification.from_pretrained('roberta-base')
-    encoded_train, encoded_val = get_encoded_data(train=True)
+    train_texts, _, train_labels, _ = read_data()
+    encoded_train = encode_texts(train_texts, train_labels)
     batch_size = 3
     train_loader = DataLoader(encoded_train, batch_size=batch_size, shuffle=True)
     for batch_idx, batch in enumerate(train_loader):
