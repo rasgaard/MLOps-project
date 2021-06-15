@@ -13,7 +13,6 @@ start = time.time()
 def train(epochs=3, lr=0.003):
     model = RobertaForSequenceClassification.from_pretrained('roberta-base')
     model.to(device)
-    model.train()
 
     #wandb.watch(model, log_freq=100)
 
@@ -26,6 +25,7 @@ def train(epochs=3, lr=0.003):
     for epoch in range(epochs):
         running_loss_train = 0
         running_loss_val = 0
+        model.train()
         for batch_idx, batch in enumerate(train_loader):
             optim.zero_grad()
             input_ids = batch['input_ids'].to(device)
@@ -43,19 +43,21 @@ def train(epochs=3, lr=0.003):
 
         print(f"\nEpoch {epoch+1}/{epochs}\tLoss: {running_loss/len(train_loader)}\n")
 
-        for batch_idx, batch in enumerate(val_loader):
-            input_ids = batch['input_ids'].to(device)
-            attention_mask = batch['attention_mask'].to(device)
-            labels = batch['labels'].to(device)
+        with torch.no_grad(): 
+            model.eval()
+            for batch_idx, batch in enumerate(val_loader):
+                input_ids = batch['input_ids'].to(device)
+                attention_mask = batch['attention_mask'].to(device)
+                labels = batch['labels'].to(device)
 
-            outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
-            loss = outputs[0]
-            running_loss_val += loss
+                outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
+                loss = outputs[0]
+                running_loss_val += loss
         
         # Save the model with the lowest validation loss 
-        if running_loss_val < lowest_val_loss:
+        if running_loss_val/len(val_loader) < lowest_val_loss:
             model.save_pretrained('models/Roberta-fakenews.pt') 
-            running_loss_val = lowest_val_loss
+            lowest_val_loss = running_loss_val/len(val_loader)
 
 
     # Execution time 
