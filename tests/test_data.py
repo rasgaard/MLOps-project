@@ -1,46 +1,27 @@
-from make_dataset import dataset
-from preprocess_dataset import preprocess
-import pandas as pd
-import datasets as ds
-import pickle
+from src.data.make_dataset import read_data, get_encoded_data
+from src.features.build_features import encode_text
+import numpy as np
 import torch
 
-dataset = dataset()
-#print(dataset.column_names)
+# read raw data 
+text, labels = read_data()
 
-# test of labels 
-def test_labels():
-    #print(len(dataset.features['labels'].names))
-    assert len(dataset.features['labels'].names) == 2
-    assert dataset.features['labels'].names[0] == 'unreliable'
-    assert dataset.features['labels'].names[1] == 'reliable'
-test_labels()
+# test raw data 
+def test_raw_data():
+    assert len(set(labels)) == 2 # 2 classes 
+    assert np.isnan(labels).sum() == 0 # no na's in labels 
+    assert len(text) == len(labels) # no. text obs equals no. labels
+test_raw_data()
 
-# test names and lengths of columns 
-def test_columns():
-    assert dataset.column_names == ['author', 'text', 'labels']
-    assert len(dataset['text']) == len(dataset['labels'])
-test_columns()
+# read encoded data 
+encoded_train, encoded_val = get_encoded_data(train=True)
 
-# test no missing values
-def test_na():
-    dataset_pd = pd.DataFrame(dataset)
-    #print(dataset_pd.isna().sum().sum())
-    assert dataset_pd.isna().sum().sum() == 0
-test_na()
-
-#train_data, val_data = preprocess()
-with open('data/processed/train_tokenized.pickle', 'rb') as f:
-        train_data = pickle.load(f)
-
-with open('data/processed/val_tokenized.pickle', 'rb') as f:
-        val_data = pickle.load(f)
-
-def test_tokenizer():
-    assert train_data.column_names == ['attention_mask', 'author', 'input_ids', 'labels', 'text']
-    assert val_data.column_names == ['attention_mask', 'author', 'input_ids', 'labels', 'text']
-    assert train_data['input_ids'].dtype is torch.int64
-    assert train_data['labels'].dtype is torch.int64
-    assert val_data['input_ids'].dtype is torch.int64
-    assert val_data['labels'].dtype is torch.int64
-test_tokenizer()
+# test encoded data
+def test_encoded_data():
+    assert list(encoded_train.__getitem__(0).keys()) == ['input_ids', 'attention_mask', 'labels']
+    assert list(encoded_val.__getitem__(0).keys()) == ['input_ids', 'attention_mask', 'labels']
+    assert encoded_train.__getitem__(0)['labels'].dtype is torch.int64
+    assert encoded_train.__getitem__(0)['input_ids'].dtype is torch.int64
+    assert encoded_val.__getitem__(0)['labels'].dtype is torch.int64
+    assert encoded_val.__getitem__(0)['input_ids'].dtype is torch.int64
+test_encoded_data()
