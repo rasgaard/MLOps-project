@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
 
 
 def read_data():
@@ -8,7 +9,7 @@ def read_data():
     texts, labels = list(df['text'].values), list(df['label'].values)
 
     # train og validation split
-    train_texts, val_texts, train_labels, val_labels = train_test_split(texts, labels, train_size=0.85, test_size = 0.15)
+    train_texts, val_texts, train_labels, val_labels = train_test_split(texts, labels, train_size=0.85, test_size = 0.15, shuffle = False)
 
     return train_texts, val_texts, train_labels, val_labels
 
