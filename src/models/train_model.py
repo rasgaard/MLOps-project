@@ -63,9 +63,9 @@ def train(epochs, lr):
                 print(f"\nValidation batch {batch_idx+1}/{len(val_loader)}", end='\r')
 
         # Save the model with the lowest validation loss
-        if running_loss_val < lowest_val_loss:
+        if running_loss_val/len(val_loader) < lowest_val_loss:
             model.save_pretrained('models/Roberta-fakenews.pt')
-            lowest_val_loss = running_loss_val
+            lowest_val_loss = running_loss_val/len(val_loader)
 
         print(f"\nEpoch {epoch+1}/{epochs}\
                 \nTraining loss: {running_loss_train/len(train_loader)}\
