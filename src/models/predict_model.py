@@ -1,14 +1,14 @@
-import torch
-
 import argparse
 import sys
+
+import torch
 import torch.nn.functional as F
+from torch.utils.data import DataLoader
+from transformers import RobertaForSequenceClassification
 
 from src.data.make_dataset import read_data
 from src.features.build_features import encode_texts
 
-from torch.utils.data import DataLoader
-from transformers import RobertaForSequenceClassification
 device = torch.device(
     'cuda') if torch.cuda.is_available() else torch.device('cpu')
 

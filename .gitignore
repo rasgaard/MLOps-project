@@ -95,4 +95,4 @@ wandb/
 .pytest_cache/
 
 # models
-models/
+/models/

@@ -1,7 +1,5 @@
-from azureml.core import Experiment, ScriptRunConfig, Environment
+from azureml.core import Environment, Experiment, ScriptRunConfig, Workspace
 from azureml.core.conda_dependencies import CondaDependencies
-from azureml.core import Workspace
-
 
 ws = Workspace.get(name="MLOps_day7",
                subscription_id='5a60d53a-0d60-4174-a594-5c65a8fc1cbe',
