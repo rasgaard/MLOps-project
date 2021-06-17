@@ -15,10 +15,10 @@ def test_training_evaluation(epochs=1, lr=0.003):
 
     optim = AdamW(model.parameters(), lr=lr)
     train_texts, val_texts, _, train_labels, val_labels, _ = read_data()
-    train_texts, val_texts, train_labels, val_labels = train_texts[:12], val_texts[:12], train_labels[:12], val_labels[:12]
+    train_texts, val_texts, train_labels, val_labels = train_texts[:3], val_texts[:3], train_labels[:3], val_labels[:3]
     encoded_train, encoded_val = encode_texts(train_texts, train_labels), encode_texts(val_texts, val_labels)
-    train_loader = DataLoader(encoded_train, 6, shuffle=True)
-    val_loader = DataLoader(encoded_val, 6, shuffle=True)
+    train_loader = DataLoader(encoded_train, 3, shuffle=True)
+    val_loader = DataLoader(encoded_val, 3, shuffle=True)
 
     for epoch in range(epochs):
         weights = []
