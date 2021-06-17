@@ -1,6 +1,7 @@
 import argparse
 import sys
 import time
+#from azureml.core import Run # if running on Azure 
 
 import torch
 from torch.utils.data import DataLoader
@@ -14,7 +15,7 @@ device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cp
 
 # wandb.init()
 start = time.time()
-
+#run = Run.get_context() # if running on Azure 
 
 def train(epochs, lr):
     model = RobertaForSequenceClassification.from_pretrained('roberta-base')
@@ -44,13 +45,14 @@ def train(epochs, lr):
             loss = outputs[0]
             running_loss_train += loss
             loss.backward()
+            #run.log('training loss (each batch)', loss.item()) # if running on Azure 
             optim.step()
             print(f"\nTrain batch {batch_idx+1}/{len(train_loader)}", end='\r')
             # if batch_idx % 40 == 0:
             #wandb.log({"Loss": loss})
 
         
-
+        
         with torch.no_grad():
             model.eval()
             for batch_idx, batch in enumerate(val_loader):
@@ -60,6 +62,7 @@ def train(epochs, lr):
 
                 outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
                 loss = outputs[0]
+                #run.log('validation loss (each batch)', loss.item()) # if running on Azure 
                 running_loss_val += loss
                 print(f"\nValidation batch {batch_idx+1}/{len(val_loader)}", end='\r')
 
@@ -71,6 +74,10 @@ def train(epochs, lr):
         print(f"\nEpoch {epoch+1}/{epochs}\
                 \nTraining loss: {running_loss_train/len(train_loader)}\
                 \nValidation loss: {running_loss_val/len(val_loader)}\n")
+        
+        # Log losses on Azure
+        #run.log("Training loss (each epoch)",(running_loss_train/len(train_loader)).item())
+        #run.log("Validation loss (each epoch)",(running_loss_val/len(val_loader)).item())
 
     # Execution time
     end = time.time()

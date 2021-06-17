@@ -9,17 +9,19 @@ from src.features.build_features import encode_texts
 
 from torch.utils.data import DataLoader
 from transformers import RobertaForSequenceClassification
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+device = torch.device(
+    'cuda') if torch.cuda.is_available() else torch.device('cpu')
+
 
 def predict(model_name):
     model = RobertaForSequenceClassification.from_pretrained('roberta-base')
-    
+
     if model_name != 'None':
         model.load_state_dict(torch.load(model_name))
 
-    model.to(device)    
-    model.eval()
-    
+    model.to(device)
+    # model.eval()
+
     batch_size = 4
     _, _, test_texts, _, _, test_labels = read_data()
     encoded_test = encode_texts(test_texts, test_labels)
@@ -33,22 +35,23 @@ def predict(model_name):
             attention_mask = batch['attention_mask'].to(device)
             labels = batch['labels'].to(device)
 
-            outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
+            outputs = model(
+                input_ids, attention_mask=attention_mask, labels=labels)
+            # Logits which change every time the output is generated
+            print("Logits: ", outputs.logits)
 
-            #print("Outputs: ", outputs)
-
-            probabilities = F.softmax(outputs[1], dim=1)
+            probabilities = F.softmax(outputs.logits, dim=-1)
             pred_labels = []
             print("Probs: ", probabilities)
             print("Labels: ", labels)
-        
+
             for i in range(len(labels)):
                 print(probabilities[i][0])
                 if probabilities[i][0] >= 0.5:
                     pred_labels.append(0)
                 else:
                     pred_labels.append(1)
-            
+
                 false += abs(pred_labels[i] - labels[i])
             total += len(labels)
             running_accu = 1-(false/total)
@@ -57,8 +60,9 @@ def predict(model_name):
     accuracy = 1-(false/total)
     print("Accuracy: ", accuracy)
 
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Training arguments")
+    parser = argparse.ArgumentParser(description="Prediction arguments")
     parser.add_argument("--m", default=None)
     args = parser.parse_args(sys.argv[1:])
     print(args)
