@@ -10,7 +10,7 @@ from src.features.build_features import encode_texts
 
 def test_model():
     model = RobertaForSequenceClassification.from_pretrained('roberta-base')
-    train_texts, _, train_labels, _ = read_data()
+    train_texts, _, _, train_labels, _, _ = read_data()
     encoded_train = encode_texts(train_texts, train_labels)
     batch_size = 3
     train_loader = DataLoader(encoded_train, batch_size=batch_size, shuffle=True)

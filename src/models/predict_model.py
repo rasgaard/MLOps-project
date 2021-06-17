@@ -21,14 +21,14 @@ def predict(model_name):
     model.eval()
     
     batch_size = 4
-    _, val_texts, _, val_labels = read_data()
-    encoded_val = encode_texts(val_texts, val_labels)
-    val_loader = DataLoader(encoded_val, batch_size, shuffle=True)
+    _, _, test_texts, _, _, test_labels = read_data()
+    encoded_test = encode_texts(test_texts, test_labels)
+    test_loader = DataLoader(encoded_test, batch_size, shuffle=True)
     
     false = 0
     total = 0
     with torch.no_grad():
-        for batch_idx, batch in enumerate(val_loader):
+        for _, batch in enumerate(test_loader):
             input_ids = batch['input_ids'].to(device)
             attention_mask = batch['attention_mask'].to(device)
             labels = batch['labels'].to(device)
@@ -43,6 +43,7 @@ def predict(model_name):
             print("Labels: ", labels)
         
             for i in range(len(labels)):
+                print(probabilities[i][0])
                 if probabilities[i][0] >= 0.5:
                     pred_labels.append(0)
                 else:
