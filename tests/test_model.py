@@ -15,7 +15,6 @@ def test_model():
     batch_size = 3
     train_loader = DataLoader(encoded_train, batch_size=batch_size, shuffle=True)
     for batch_idx, batch in enumerate(train_loader):
-
         input_ids = batch['input_ids']
         attention_mask = batch['attention_mask']
         labels = batch['labels']

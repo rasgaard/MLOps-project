@@ -25,7 +25,6 @@ def test_encoded_data():
     assert list(encoded_train.__getitem__(0).keys()) == ['input_ids', 'attention_mask', 'labels']
     assert list(encoded_val.__getitem__(0).keys()) == ['input_ids', 'attention_mask', 'labels']
     assert list(encoded_test.__getitem__(0).keys()) == ['input_ids', 'attention_mask', 'labels']
-
     assert encoded_train.__getitem__(0)['labels'].dtype is torch.int64
     assert encoded_train.__getitem__(0)['input_ids'].dtype is torch.int64
     assert encoded_val.__getitem__(0)['labels'].dtype is torch.int64
