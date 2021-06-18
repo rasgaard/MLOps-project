@@ -13,14 +13,30 @@ device = torch.device(
     'cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 
-def predict(model_name):
+def predict(model_name, logger):
+    if logger is not None:
+        if logger == 'azure':
+            print("Monitoring on Azure")
+            from azureml.core import Run
+            run = Run.get_context()
+            import joblib
+        if logger == 'wandb':
+            print("Monitoring with wandb")
+        else:
+            raise ValueError("Logger has to be either 'azure' or 'wandb'")
+
     model = RobertaForSequenceClassification.from_pretrained('roberta-base')
 
     if model_name != 'None':
-        model.load_state_dict(torch.load(model_name))
+        if logger == 'azure':
+            model_path = f'models/' + model_name
+            model = joblib.load(model_path)
+            print('loading our model')
+        else:
+            model.load_state_dict(torch.load(model_name))
 
     model.to(device)
-    # model.eval()
+    model.eval()
 
     batch_size = 4
     _, _, test_texts, _, _, test_labels = read_data()
@@ -30,6 +46,8 @@ def predict(model_name):
     false = 0
     total = 0
     with torch.no_grad():
+        preds = []
+        True_labels = []
         for _, batch in enumerate(test_loader):
             input_ids = batch['input_ids'].to(device)
             attention_mask = batch['attention_mask'].to(device)
@@ -46,11 +64,14 @@ def predict(model_name):
             print("Labels: ", labels)
 
             for i in range(len(labels)):
+                True_labels.append(labels[i].item())
                 print(probabilities[i][0])
                 if probabilities[i][0] >= 0.5:
                     pred_labels.append(0)
+                    preds.append(0)
                 else:
                     pred_labels.append(1)
+                    preds.append(1)
 
                 false += abs(pred_labels[i] - labels[i])
             total += len(labels)
@@ -59,11 +80,27 @@ def predict(model_name):
 
     accuracy = 1-(false/total)
     print("Accuracy: ", accuracy)
-
+    if logger is not None:
+        if logger == 'azure':
+            run.log("Accuray",accuracy.item())
+            # log table with preds and labels
+            for i in range(len(preds)):
+                run.log_row("True_vs_pred", True_class = True_labels[i], Predicted_class=preds[i])
+                # Confusion matrix
+                cm = confusion_matrix(True_labels,preds)
+                cm = {"schema_type": "confusion_matrix",
+                    "schema_version": "1.0.0",
+                    "data": {
+                    "class_labels": ["0", "1"],
+                    "matrix": [[int(y) for y in x] for x in cm]
+                    }
+                    }
+                run.log_confusion_matrix('Confusion matrix', cm)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Prediction arguments")
     parser.add_argument("--m", default=None)
+    parser.add_argument("--logger", default=None)
     args = parser.parse_args(sys.argv[1:])
     print(args)
 

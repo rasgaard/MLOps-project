@@ -18,6 +18,8 @@ def train(epochs, learning_rate, logger, batch_size=4, num_workers=2):
             print("Monitoring on Azure")
             from azureml.core import Run
             run = Run.get_context()
+            import joblib
+            import copy 
         if logger == 'wandb':
             print("Monitoring with wandb")
             import wandb
@@ -50,6 +52,7 @@ def train(epochs, learning_rate, logger, batch_size=4, num_workers=2):
         num_training_steps=num_training_steps
     )
 
+    lowest_val_loss = 1000
     for epoch in range(epochs):
         running_train_loss = 0
 
@@ -103,6 +106,10 @@ def train(epochs, learning_rate, logger, batch_size=4, num_workers=2):
                 \nValidation loss: {running_val_loss/len(val_loader)}\
                 \nValidation accuracy: {running_val_acc/len(val_loader)}")
 
+        if running_val_loss/len(val_loader) < lowest_val_loss:
+            best_model = copy.deepcopy(model)
+            lowest_val_loss = running_val_loss/len(val_loader)
+
         if logger is not None:
             if logger == 'azure':
                 run.log("Trainig loss", running_train_loss/len(train_loader))
@@ -113,8 +120,14 @@ def train(epochs, learning_rate, logger, batch_size=4, num_workers=2):
                            "Validation loss": running_val_loss/len(val_loader),
                            "Validation accuracy": running_val_acc/len(val_loader)})
 
-    model.save_pretrained(
-        f"models/roberta_fakenews_lr={learning_rate}_epochs={epochs}_batchsize={batch_size}_numworkers={num_workers}")
+    if logger is not None:
+        if logger == 'azure':
+            model_file = 'Roberta_fakenews_azure.pkl'
+            joblib.dump(value=best_model, filename=model_file)
+            run.upload_file(name = 'outputs/' + model_file, path_or_stream = './' + model_file)
+        if logger == 'wandb':
+            model.save_pretrained(
+                f"models/roberta_fakenews_lr={learning_rate}_epochs={epochs}_batchsize={batch_size}_numworkers={num_workers}")
 
 
 if __name__ == '__main__':
