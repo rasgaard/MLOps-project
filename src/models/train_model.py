@@ -20,7 +20,7 @@ def train(epochs, learning_rate, logger, batch_size=4, num_workers=2):
             run = Run.get_context()
             import joblib
             import copy 
-        if logger == 'wandb':
+        elif logger == 'wandb':
             print("Monitoring with wandb")
             import wandb
             wandb.init(config={"epochs": epochs, 

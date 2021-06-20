@@ -5,6 +5,7 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from transformers import RobertaForSequenceClassification
+from sklearn.metrics import confusion_matrix
 
 from src.data.make_dataset import read_data
 from src.features.build_features import encode_texts
@@ -20,7 +21,7 @@ def predict(model_name, logger):
             from azureml.core import Run
             run = Run.get_context()
             import joblib
-        if logger == 'wandb':
+        elif logger == 'wandb':
             print("Monitoring with wandb")
         else:
             raise ValueError("Logger has to be either 'azure' or 'wandb'")
@@ -104,4 +105,4 @@ if __name__ == '__main__':
     args = parser.parse_args(sys.argv[1:])
     print(args)
 
-    predict(model_name=str(args.m))
+    predict(model_name=str(args.m), logger=args.logger)
