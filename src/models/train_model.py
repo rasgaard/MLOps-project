@@ -115,7 +115,7 @@ def train(epochs, learning_rate, logger, batch_size, num_workers, seed):
                            "Validation accuracy": running_val_acc/len(val_loader)})
 
     model.save_pretrained(
-        f"models/roberta_fakenews_lr={learning_rate}_epochs={epochs}_batchsize={batch_size}_numworkers={num_workers}")
+        f"models/roberta_fakenews_lr={learning_rate}_epochs={epochs}_batchsize={batch_size}_numworkers={num_workers}_seed={args.seed}")
 
 
 if __name__ == '__main__':

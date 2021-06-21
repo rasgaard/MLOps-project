@@ -14,13 +14,10 @@ device = torch.device(
 
 
 def predict(model_name):
-    model = RobertaForSequenceClassification.from_pretrained('roberta-base')
-
-    if model_name != 'None':
-        model.load_state_dict(torch.load(model_name))
+    model = RobertaForSequenceClassification.from_pretrained(f"models/{model_name}")
 
     model.to(device)
-    # model.eval()
+    model.eval()
 
     batch_size = 4
     _, _, test_texts, _, _, test_labels = read_data()
@@ -63,8 +60,8 @@ def predict(model_name):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Prediction arguments")
-    parser.add_argument("--m", default=None)
+    parser.add_argument("--model_name", default=None, type=str)
     args = parser.parse_args(sys.argv[1:])
     print(args)
 
-    predict(model_name=str(args.m))
+    predict(model_name=args.model_name)
