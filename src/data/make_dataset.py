@@ -1,4 +1,9 @@
+import os
+import random
+
+import numpy as np
 import pandas as pd
+import torch
 from sklearn.model_selection import train_test_split
 
 
@@ -13,6 +18,19 @@ def read_data():
 
     return train_texts, val_texts, test_texts, train_labels, val_labels, test_labels
 
+
+# https://datascience.stackexchange.com/questions/66345/why-ml-model-produces-different-results-despite-random-state-defined-and-how-to
+def seed_everything(seed=42):
+    """"
+    Seed everything.
+    """   
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
 
 if __name__ == "__main__":
     pass

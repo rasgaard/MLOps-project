@@ -5,9 +5,8 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import AdamW, RobertaForSequenceClassification, get_scheduler
-import numpy as np
 
-from src.data.make_dataset import read_data
+from src.data.make_dataset import read_data, seed_everything
 from src.features.build_features import encode_texts
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -130,7 +129,6 @@ if __name__ == '__main__':
     args = parser.parse_args(sys.argv[1:])
     print(args)
 
-    torch.manual_seed(args.seed)
-    np.random.seed(args.seed)
+    seed_everything(args.seed)
 
     train(epochs=args.epochs, learning_rate=args.lr, logger=args.logger, batch_size=args.batch_size, num_workers=args.n_workers, seed=args.seed)
