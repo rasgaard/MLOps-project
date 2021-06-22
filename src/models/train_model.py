@@ -39,8 +39,8 @@ def train(epochs, learning_rate, logger, batch_size, num_workers, seed):
     encoded_train = encode_texts(train_texts, train_labels)
     encoded_val = encode_texts(val_texts, val_labels)
 
-    train_loader = DataLoader(encoded_train, batch_size, shuffle=True, num_workers=num_workers)
-    val_loader = DataLoader(encoded_val, batch_size, shuffle=True, num_workers=num_workers)
+    train_loader = DataLoader(encoded_train, batch_size, num_workers=num_workers)
+    val_loader = DataLoader(encoded_val, batch_size, num_workers=num_workers)
 
     num_training_steps = epochs * len(train_loader)
     train_progress_bar = tqdm(range(num_training_steps))
