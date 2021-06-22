@@ -1,4 +1,5 @@
 import argparse
+import copy
 import sys
 
 import torch
@@ -25,7 +26,7 @@ def train(epochs, learning_rate, logger, batch_size, num_workers, seed):
                                "lr": learning_rate, 
                                "batch_size": batch_size, 
                                "num_workers":num_workers,
-                               "seed": args.seed})
+                               "seed": seed})
         else:
             raise ValueError("Logger has to be either 'azure' or 'wandb'")
 
@@ -44,13 +45,14 @@ def train(epochs, learning_rate, logger, batch_size, num_workers, seed):
     num_training_steps = epochs * len(train_loader)
     train_progress_bar = tqdm(range(num_training_steps))
     val_progress_bar = tqdm(range(epochs * len(val_loader)))
+
     lr_scheduler = get_scheduler(
         "linear",
         optimizer=optimizer,
         num_warmup_steps=0,
         num_training_steps=num_training_steps
     )
-
+    lowest_val_loss = 1e3
     for epoch in range(epochs):
         running_train_loss = 0
 
@@ -106,15 +108,18 @@ def train(epochs, learning_rate, logger, batch_size, num_workers, seed):
 
         if logger is not None:
             if logger == 'azure':
-                run.log("Trainig loss", running_train_loss/len(train_loader))
+                run.log("Training loss", running_train_loss/len(train_loader))
                 run.log("Validation loss", running_val_loss/len(val_loader))
                 run.log("Validation accuracy", running_val_acc/len(val_loader))
             if logger == 'wandb':
                 wandb.log({"Training loss": running_train_loss/len(train_loader),
                            "Validation loss": running_val_loss/len(val_loader),
                            "Validation accuracy": running_val_acc/len(val_loader)})
+        if running_val_loss/len(val_loader) < lowest_val_loss:
+            best_model = copy.deepcopy(model)
+            lowest_val_loss = running_val_loss/len(val_loader)
 
-    model.save_pretrained(
+    best_model.save_pretrained(
         f"models/roberta_fakenews_lr={learning_rate}_epochs={epochs}_batchsize={batch_size}_numworkers={num_workers}_seed={args.seed}")
 
 
