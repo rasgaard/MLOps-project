@@ -66,5 +66,6 @@ if __name__ == '__main__':
     parser.add_argument("--m", default=None)
     args = parser.parse_args(sys.argv[1:])
     print(args)
+    #tilføj seed
 
     predict(model_name=str(args.m))
