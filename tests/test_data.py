@@ -11,6 +11,7 @@ train_texts, val_texts, test_texts, train_labels, val_labels, test_labels = read
 def test_raw_data():
     assert len(set(train_labels)) == 2 # 2 classes 
     assert np.isnan(train_labels).sum() == 0 # no na's in labels 
+    assert np.isnan(train_texts).sum() == 0 # no na's in texts
     assert len(train_texts) == len(train_labels) # no. text obs equals no. labels
 
 test_raw_data()
