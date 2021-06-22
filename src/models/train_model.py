@@ -6,29 +6,30 @@ from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import AdamW, RobertaForSequenceClassification, get_scheduler
 
-from src.data.make_dataset import read_data
+from src.data.make_dataset import read_data, seed_everything
 from src.features.build_features import encode_texts
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-def train(epochs, learning_rate, logger, batch_size=4, num_workers=2):
+def train(epochs, learning_rate, logger, batch_size, num_workers, seed):
 
     if logger is not None:
         if logger == 'azure':
             print("Monitoring on Azure")
             from azureml.core import Run
             run = Run.get_context()
-        if logger == 'wandb':
+        elif logger == 'wandb':
             print("Monitoring with wandb")
             import wandb
             wandb.init(config={"epochs": epochs, 
                                "lr": learning_rate, 
                                "batch_size": batch_size, 
-                               "num_workers":num_workers})
+                               "num_workers":num_workers,
+                               "seed": args.seed})
         else:
             raise ValueError("Logger has to be either 'azure' or 'wandb'")
 
-    model = RobertaForSequenceClassification.from_pretrained('roberta-base')
+    model = RobertaForSequenceClassification.from_pretrained('roberta-base', num_labels=2)
     model.to(device)
 
     optimizer = AdamW(model.parameters(), lr=learning_rate)
@@ -114,17 +115,20 @@ def train(epochs, learning_rate, logger, batch_size=4, num_workers=2):
                            "Validation accuracy": running_val_acc/len(val_loader)})
 
     model.save_pretrained(
-        f"models/roberta_fakenews_lr={learning_rate}_epochs={epochs}_batchsize={batch_size}_numworkers={num_workers}")
+        f"models/roberta_fakenews_lr={learning_rate}_epochs={epochs}_batchsize={batch_size}_numworkers={num_workers}_seed={args.seed}")
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Training arguments")
-    parser.add_argument("-lr", default=5e-5, type=float)
+    parser.add_argument("--lr", default=5e-5, type=float)
     parser.add_argument("--epochs", default=3, type=int)
-    parser.add_argument("--batchsize", default=4, type=int)
-    parser.add_argument("--nworkers", default=2, type=int)
+    parser.add_argument("--batch_size", default=4, type=int)
+    parser.add_argument("--n_workers", default=2, type=int)
     parser.add_argument("--logger", default=None)
+    parser.add_argument("--seed", default=0, type=int)
     args = parser.parse_args(sys.argv[1:])
     print(args)
 
-    train(epochs=args.epochs, learning_rate=args.lr, logger=args.logger, batch_size=args.batchsize, num_workers=args.nworkers)
+    seed_everything(args.seed)
+
+    train(epochs=args.epochs, learning_rate=args.lr, logger=args.logger, batch_size=args.batch_size, num_workers=args.n_workers, seed=args.seed)
