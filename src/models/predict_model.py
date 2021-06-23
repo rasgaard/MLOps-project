@@ -6,14 +6,14 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from transformers import RobertaForSequenceClassification
 
-from src.data.make_dataset import read_data
+from src.data.make_dataset import read_data, seed_everything
 from src.features.build_features import encode_texts
 
 device = torch.device(
     'cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 
-def predict(model_name):
+def predict(model_name, seed):
     model = RobertaForSequenceClassification.from_pretrained(f"models/{model_name}")
 
     model.to(device)
@@ -61,7 +61,10 @@ def predict(model_name):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Prediction arguments")
     parser.add_argument("--model_name", default=None, type=str)
+    parser.add_argument("--seed", default=0, type=int)
     args = parser.parse_args(sys.argv[1:])
     print(args)
+    #tilføj seed
+    seed_everything(args.seed)
 
-    predict(model_name=args.model_name)
+    predict(model_name=args.model_name, seed=args.seed)
